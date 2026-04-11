@@ -1,5 +1,7 @@
 # Flutter Todo Reminder
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 This directory holds the planning docs for a Flutter app inspired by Microsoft To Do.
 
 The current scope is:
@@ -33,6 +35,32 @@ CI baseline:
 - GitHub Actions workflow: `.github/workflows/flutter_ci.yml`
 - Checks: `flutter pub get`, `dart run build_runner build --delete-conflicting-outputs`, `flutter analyze`, `flutter test`
 - Ubuntu runner installs `libsqlite3-dev` because this project uses the system SQLite hook configuration
+
+Release baseline:
+
+- GitHub Actions workflow: `.github/workflows/android_release.yml`
+- Trigger: push a tag like `v0.1.0`, or run the workflow manually from GitHub Actions
+- Output: Android release APK attached to the workflow artifact, and attached to the GitHub Release when triggered by a tag
+- Signing: if Android signing secrets are configured in GitHub, the workflow uses them; otherwise it falls back to the debug keystore for development-only releases
+
+Recommended GitHub secrets for production signing:
+
+- `ANDROID_KEYSTORE_BASE64`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+How to cut a release:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Notes:
+
+- The Android application ID is `io.github.jiangdengke.flutter_todo_reminder`
+- Falling back to the debug keystore is convenient for internal testing, but it is not appropriate for public Play Store releases
 
 When you are ready to scaffold code in this same directory:
 

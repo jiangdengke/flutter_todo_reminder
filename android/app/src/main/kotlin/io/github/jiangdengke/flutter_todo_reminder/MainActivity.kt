@@ -1,4 +1,4 @@
-package com.example.flutter_todo_reminder
+package io.github.jiangdengke.flutter_todo_reminder
 
 import io.flutter.embedding.android.FlutterActivity
 
