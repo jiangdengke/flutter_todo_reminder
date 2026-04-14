@@ -7,12 +7,11 @@ import '../features/planned/presentation/planned_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/shell/presentation/app_shell.dart';
 import '../features/task_detail/presentation/task_detail_screen.dart';
-import '../features/tasks/presentation/tasks_screen.dart';
 import 'app_destinations.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: AppDestination.myDay.route,
+    initialLocation: AppDestination.todo.route,
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -22,7 +21,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppDestination.myDay.route,
+                path: AppDestination.todo.route,
                 builder: (context, state) => const MyDayScreen(),
               ),
             ],
@@ -30,15 +29,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppDestination.important.route,
-                builder: (context, state) => const ImportantScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppDestination.planned.route,
+                path: AppDestination.planning.route,
                 builder: (context, state) => const PlannedScreen(),
               ),
             ],
@@ -46,8 +37,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppDestination.tasks.route,
-                builder: (context, state) => const TasksScreen(),
+                path: AppDestination.priority.route,
+                builder: (context, state) => const ImportantScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppDestination.profile.route,
+                builder: (context, state) => const SettingsScreen(),
               ),
             ],
           ),
@@ -55,7 +54,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
+        redirect: (context, state) => AppDestination.profile.route,
       ),
       GoRoute(
         path: '/task/:taskId',

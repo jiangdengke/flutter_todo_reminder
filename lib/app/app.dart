@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'bootstrap/app_bootstrap.dart';
+import 'localization/app_locale.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
 
@@ -11,29 +13,54 @@ class TodoReminderApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final startup = ref.watch(appStartupProvider);
+    final locale = ref.watch(appLocaleProvider);
 
     return startup.when(
       data: (_) {
         final router = ref.watch(routerProvider);
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'Todo Reminder',
-          theme: AppTheme.light(),
+          title: locale.languageCode == 'zh' ? '待办提醒' : 'Todo Reminder',
+          theme: AppTheme.dark(),
+          locale: locale,
+          supportedLocales: appSupportedLocales,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           routerConfig: router,
         );
       },
-      loading: () => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Todo Reminder',
-        theme: AppTheme.light(),
-        home: const _StartupScreen(),
+      loading: () => _AppFrame(locale: locale, child: const _StartupScreen()),
+      error: (error, stackTrace) => _AppFrame(
+        locale: locale,
+        child: _StartupFailureScreen(error: error),
       ),
-      error: (error, stackTrace) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Todo Reminder',
-        theme: AppTheme.light(),
-        home: _StartupFailureScreen(error: error),
-      ),
+    );
+  }
+}
+
+class _AppFrame extends StatelessWidget {
+  const _AppFrame({required this.locale, required this.child});
+
+  final Locale locale;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: locale.languageCode == 'zh' ? '待办提醒' : 'Todo Reminder',
+      theme: AppTheme.dark(),
+      locale: locale,
+      supportedLocales: appSupportedLocales,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: child,
     );
   }
 }
@@ -69,13 +96,16 @@ class _StartupScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Preparing your reminder workspace',
+                  context.tr('正在准备应用', 'Preparing app'),
                   textAlign: TextAlign.center,
                   style: textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Initializing local storage, timezone support, and notification services.',
+                  context.tr(
+                    '初始化本地数据库与提醒服务。',
+                    'Initializing local storage and reminders.',
+                  ),
                   textAlign: TextAlign.center,
                   style: textTheme.bodyMedium,
                 ),
@@ -123,7 +153,7 @@ class _StartupFailureScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'App startup failed',
+                      context.tr('启动失败', 'Startup failed'),
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(color: colorScheme.onErrorContainer),
                     ),

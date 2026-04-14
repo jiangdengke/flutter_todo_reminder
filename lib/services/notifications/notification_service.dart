@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 enum NotificationPermissionState { unknown, granted, denied, notSupported }
@@ -12,9 +13,21 @@ class NotificationService {
     const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       iOS: DarwinInitializationSettings(),
+      macOS: DarwinInitializationSettings(),
+      linux: LinuxInitializationSettings(
+        defaultActionName: 'Open notification',
+      ),
     );
 
     await _plugin.initialize(settings: initializationSettings);
-    return NotificationPermissionState.unknown;
+
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.linux ||
+      TargetPlatform.macOS ||
+      TargetPlatform.windows => NotificationPermissionState.notSupported,
+      TargetPlatform.android ||
+      TargetPlatform.iOS => NotificationPermissionState.unknown,
+      _ => NotificationPermissionState.unknown,
+    };
   }
 }
