@@ -7,11 +7,17 @@ import '../../services/timezone/timezone_service.dart';
 import '../localization/app_locale.dart';
 
 final appBootstrapperProvider = Provider<AppBootstrapper>((ref) {
-  return AppBootstrapper(
+  final bootstrapper = AppBootstrapper(
     databaseBootstrap: const DatabaseBootstrap(),
     notificationService: NotificationService(),
     timezoneService: const TimezoneService(),
   );
+  ref.onDispose(bootstrapper.notificationService.dispose);
+  return bootstrapper;
+});
+
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return ref.watch(appBootstrapperProvider).notificationService;
 });
 
 final appStartupProvider = FutureProvider<AppStartupState>((ref) async {

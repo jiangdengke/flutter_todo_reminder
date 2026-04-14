@@ -7,6 +7,7 @@ import '../../../app/localization/app_locale.dart';
 import '../../../app/theme/noir_palette.dart';
 import '../../shared/application/demo_task_store.dart';
 import '../../shared/presentation/demo_task_data.dart';
+import '../../shared/presentation/task_editor_dialog.dart';
 import '../../shared/presentation/task_ui.dart';
 
 class PlannedScreen extends ConsumerStatefulWidget {
@@ -683,70 +684,24 @@ Future<void> _showCreateTaskDialog(
   WidgetRef ref,
   DateTime selectedDate,
 ) async {
-  final titleController = TextEditingController();
-  final noteController = TextEditingController();
-
-  final saved = await showDialog<bool>(
+  final result = await showTaskEditorDialog(
     context: context,
-    builder: (dialogContext) {
-      return AlertDialog(
-        title: Text(context.tr('新增待办', 'Add task')),
-        content: SizedBox(
-          width: 420,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: context.tr('标题', 'Title'),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: noteController,
-                minLines: 2,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: context.tr('备注', 'Note'),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(context.tr('取消', 'Cancel')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(context.tr('保存', 'Save')),
-          ),
-        ],
-      );
-    },
+    dialogTitle: context.tr('新增待办', 'Add task'),
+    confirmLabel: context.tr('保存', 'Save'),
   );
 
-  if (!context.mounted) {
-    titleController.dispose();
-    noteController.dispose();
+  if (!context.mounted || result == null || result.title.isEmpty) {
     return;
   }
 
-  if (saved == true && titleController.text.trim().isNotEmpty) {
-    ref
-        .read(demoTaskStoreProvider.notifier)
-        .createTask(
-          date: selectedDate,
-          title: titleController.text.trim(),
-          note: noteController.text.trim(),
-        );
-  }
-
-  titleController.dispose();
-  noteController.dispose();
+  ref
+      .read(demoTaskStoreProvider.notifier)
+      .createTask(
+        date: selectedDate,
+        title: result.title,
+        note: result.note,
+        reminderLabel: result.reminderLabel,
+      );
 }
 
 Future<void> _showEditTaskDialog(
@@ -754,70 +709,28 @@ Future<void> _showEditTaskDialog(
   WidgetRef ref,
   DemoTask task,
 ) async {
-  final titleController = TextEditingController(text: task.titleOf(context));
-  final noteController = TextEditingController(text: task.noteOf(context));
-
-  final saved = await showDialog<bool>(
+  final result = await showTaskEditorDialog(
     context: context,
-    builder: (dialogContext) {
-      return AlertDialog(
-        title: Text(context.tr('编辑任务', 'Edit task')),
-        content: SizedBox(
-          width: 420,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: context.tr('标题', 'Title'),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: noteController,
-                minLines: 2,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: context.tr('备注', 'Note'),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(context.tr('取消', 'Cancel')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(context.tr('保存', 'Save')),
-          ),
-        ],
-      );
-    },
+    dialogTitle: context.tr('编辑任务', 'Edit task'),
+    confirmLabel: context.tr('保存', 'Save'),
+    initialTitle: task.titleOf(context),
+    initialNote: task.noteOf(context),
+    initialReminderLabel: task.reminderLabel,
   );
 
-  if (!context.mounted) {
-    titleController.dispose();
-    noteController.dispose();
+  if (!context.mounted || result == null || result.title.isEmpty) {
     return;
   }
 
-  if (saved == true && titleController.text.trim().isNotEmpty) {
-    final locale = Localizations.localeOf(context);
-    ref
-        .read(demoTaskStoreProvider.notifier)
-        .updateTaskText(
-          id: task.id,
-          locale: locale,
-          title: titleController.text.trim(),
-          note: noteController.text.trim(),
-        );
-  }
-
-  titleController.dispose();
-  noteController.dispose();
+  final locale = Localizations.localeOf(context);
+  ref
+      .read(demoTaskStoreProvider.notifier)
+      .updateTask(
+        id: task.id,
+        locale: locale,
+        title: result.title,
+        note: result.note,
+        reminderLabel: result.reminderLabel,
+        clearReminder: result.reminderLabel == null,
+      );
 }

@@ -135,7 +135,24 @@ class SettingsScreen extends ConsumerWidget {
               const Divider(height: 20),
               LabeledInfoRow(
                 label: context.tr('存储方式', 'Storage mode'),
-                value: context.tr('仅本地 SQLite', 'Local SQLite only'),
+                value: context.tr(
+                  '本地 SQLite + SharedPreferences',
+                  'Local SQLite + SharedPreferences',
+                ),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FilledButton.tonalIcon(
+                  onPressed: () async {
+                    await ref
+                        .read(notificationServiceProvider)
+                        .requestPermissions();
+                    ref.invalidate(appStartupProvider);
+                  },
+                  icon: const Icon(Icons.notifications_active_outlined),
+                  label: Text(context.tr('请求通知权限', 'Request permission')),
+                ),
               ),
             ],
           ),
